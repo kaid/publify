@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 115) do
+ActiveRecord::Schema.define(:version => 20140407144138) do
 
   create_table "articles_tags", :id => false, :force => true do |t|
     t.integer "article_id"
@@ -180,7 +180,6 @@ ActiveRecord::Schema.define(:version => 115) do
 
   create_table "users", :force => true do |t|
     t.string   "login"
-    t.string   "password"
     t.text     "email"
     t.text     "name"
     t.boolean  "notify_via_email"
@@ -194,6 +193,7 @@ ActiveRecord::Schema.define(:version => 115) do
     t.datetime "last_connection"
     t.text     "settings"
     t.integer  "resource_id"
+    t.string   "avatar"
   end
 
 end

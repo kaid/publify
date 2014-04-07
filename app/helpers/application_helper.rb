@@ -106,24 +106,8 @@ module ApplicationHelper
   end
 
   def display_user_avatar(user, size='avatar', klass='alignleft')
-    if user.resource.present?
-      avatar_path = case size
-                    when 'thumb'
-                      user.resource.upload.thumb.url
-                    when 'medium'
-                      user.resource.upload.medium.url
-                    when 'large'
-                      user.resource.upload.large.url
-                    else
-                      user.resource.upload.avatar.url
-                    end
-      return if avatar_path.nil?
-      avatar_url = File.join(this_blog.base_url, avatar_path)
-    elsif user.twitter_profile_image.present?
-      avatar_url = user.twitter_profile_image
-    end
-    return unless avatar_url
-    image_tag(avatar_url, alt: user.nickname, class: klass)
+    return if user.avatar.blank?
+    image_tag(user.avatar, alt: user.nickname, class: klass)
   end
 
   def author_picture(status)

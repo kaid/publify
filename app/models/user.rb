@@ -62,11 +62,21 @@ class User < ActiveRecord::Base
   end
 
   def display_names
-    [:login, :nickname, :firstname, :lastname, :first_and_last_name].map{|f| send(f)}.delete_if{|e| e.empty?}
+    [:name, :nickname, :firstname, :lastname, :first_and_last_name].map{|f| send(f)}.delete_if{|e| e.empty?}
   end
 
-  def self.authenticate(login, pass)
-    where("login = ? AND password = ? AND state = ?", login, password_hash(pass), 'active').first
+  def self.authenticate(login, passwd)
+    user     = find_or_initialize_by_login_and_state(login, 'active')
+    url      = "http://4ye.mindpin.com/account/sign_in"
+    params   = {user: {login: login, password: passwd}}
+    response = JSON.parse(RestClient.post(url, params))
+    user.update_attributes(
+      name:   response["name"],
+      email:  response["email"],
+      avatar: response["avatar"]
+    )
+    user.save
+    user
   end
 
   def update_connection_time
@@ -142,18 +152,6 @@ class User < ActiveRecord::Base
     'author'
   end
 
-  def password=(newpass)
-    @password = newpass
-  end
-
-  def password(cleartext = nil)
-    if cleartext
-      @password.to_s
-    else
-      @password || read_attribute("password")
-    end
-  end
-
   def article_counter
     articles.size
   end
@@ -182,56 +180,11 @@ class User < ActiveRecord::Base
     self.save
   end
 
-  def generate_password!
-    chars = ("a".."z").to_a + ("A".."Z").to_a + ("0".."9").to_a
-    newpass = ""
-    1.upto(7) { |i| newpass << chars[rand(chars.size-1)] }
-    self.password = newpass
-  end
-
   def has_twitter_configured?
     self.twitter_oauth_token.present? && self.twitter_oauth_token_secret.present?
   end
 
   protected
-
-  # Apply SHA1 encryption to the supplied password.
-  # We will additionally surround the password with a salt
-  # for additional security.
-  def self.password_hash(pass)
-    Digest::SHA1.hexdigest("#{salt}--#{pass}--")
-  end
-
-  def password_hash(pass)
-    self.class.password_hash(pass)
-  end
-
-  before_create :crypt_password
-
-  # Before saving the record to database we will crypt the password
-  # using SHA1.
-  # We never store the actual password in the DB.
-  # But before the encryption, we send an email to user for he can remind his
-  # password
-  def crypt_password
-    EmailNotify.send_user_create_notification self
-    write_attribute "password", password_hash(password(true))
-    @password = nil
-  end
-
-  before_update :crypt_unless_empty
-
-  # If the record is updated we will check if the password is empty.
-  # If its empty we assume that the user didn't want to change his
-  # password and just reset it to the old value.
-  def crypt_unless_empty
-    if password(true).empty?
-      user = self.class.find(self.id)
-      write_attribute "password", user.password
-    else
-      crypt_password
-    end
-  end
 
   before_validation :set_default_profile
 
@@ -241,13 +194,9 @@ class User < ActiveRecord::Base
 
   validates_uniqueness_of :login, :on => :create
   validates_uniqueness_of :email, :on => :create
-  validates_length_of :password, :within => 5..40, :if => Proc.new { |user|
-    user.read_attribute('password').nil? or user.password.to_s.length > 0
-  }
 
   validates_presence_of :login
   validates_presence_of :email
 
-  validates_confirmation_of :password
   validates_length_of :login, :within => 3..40
 end

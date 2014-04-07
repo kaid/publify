@@ -1,5 +1,5 @@
 <div class="post">
-  <h2><%= @author.nickname %></h2>
+  <h2><%= @author.nickname.blank? ? @author.name : @author.nickname %></h2>
   <%= display_user_avatar(@author, 'thumb', 'alignright') %>
 
   <%= author_description @author %>

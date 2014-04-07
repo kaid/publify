@@ -8,9 +8,7 @@ class SetupController < ApplicationController
     this_blog.blog_name = params[:setting][:blog_name]
     this_blog.base_url = blog_base_url
 
-    @user = User.new(:login => 'admin', :email => params[:setting][:email], :nickname => "Publify Admin")
-    @user.generate_password!
-    @user.name = @user.login
+    @user = User.authenticate(params[:setting][:email], params[:setting][:password])
 
     unless this_blog.valid? and @user.valid?
       redirect_to :action => 'index'
@@ -18,9 +16,6 @@ class SetupController < ApplicationController
     end
 
     return unless this_blog.save
-
-    session[:tmppass] = @user.password
-
     return unless @user.save
 
     self.current_user = @user

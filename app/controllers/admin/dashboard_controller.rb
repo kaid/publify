@@ -7,6 +7,8 @@ class Admin::DashboardController < Admin::BaseController
     t = Time.new
     today = t.strftime("%Y-%m-%d 00:00")
 
+    puts t
+
     # Since last venue
     @newposts_count = Article.published_since(current_user.last_venue).count
     @newcomments_count = Feedback.published_since(current_user.last_venue).count

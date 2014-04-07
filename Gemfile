@@ -1,4 +1,4 @@
-source 'https://rubygems.org'
+source 'http://ruby.taobao.org'
 
 if ENV["HEROKU"]
   ruby '2.0.0'
@@ -64,6 +64,7 @@ gem 'rails_autolink', '~> 1.1.0'
 gem 'dynamic_form', '~> 1.1.4'
 
 gem 'iconv'
+gem 'rest-client'
 
 group :assets do
   gem 'sass-rails', " ~> 3.2.6"
