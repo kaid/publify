@@ -6,5 +6,6 @@ CKEDITOR.editorConfig = function(config) {
         {name: "document", items: ["Source","-","ShowBlocks"]}
     ];
     config.filebrowserImageUploadUrl = "http://img.4ye.me/images";
+    config.language = "zh-cn";
     config.extraPlugins = "simpleuploads";
 };
